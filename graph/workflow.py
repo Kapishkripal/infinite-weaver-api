@@ -15,12 +15,16 @@ Implements the 'Infinite Weaver' pipeline:
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
+import os
+
 from graph.state import StoryverseState
 from services.story_engine import (
     evaluate_world_bible,
     generate_follow_up_question,
     draft_chapter,
 )
+from services.comic_engine import generate_scene_prompt, generate_image
+from services.meme_engine import extract_humorous_quote, assemble_meme
 from core.db import supabase
 
 
@@ -102,23 +106,92 @@ def draft_story_node(state: StoryverseState) -> dict:
 
 
 def generate_comic(state: StoryverseState) -> dict:
-    """Turn the story draft into comic-panel images.
-
-    TODO: Integrate an image-generation service and populate
-    `image_paths` with the resulting asset URLs / file paths.
-    """
-    print("[node] generate_comic — pass-through (stub)")
-    return {}
+    """Turn the story draft into comic-panel images."""
+    print("[node] generate_comic — generating comic panel")
+    
+    story_draft = state.get("story_draft", "")
+    
+    # Extract prompt
+    scene_prompt = generate_scene_prompt(story_draft)
+    
+    # Generate image
+    image_path = generate_image(scene_prompt, filename="comic_raw.jpg")
+    
+    paths = state.get("image_paths", [])
+    if image_path:
+        paths.append(image_path)
+        
+    return {"image_paths": paths}
 
 
 def create_meme(state: StoryverseState) -> dict:
-    """Produce shareable meme assets from the story content.
-
-    TODO: Combine story highlights with meme templates and
-    append results to `image_paths`.
-    """
-    print("[node] create_meme — pass-through (stub)")
-    return {}
+    """Produce shareable meme assets from the story content and upload to Supabase."""
+    print("[node] create_meme — assembling meme")
+    
+    story_draft = state.get("story_draft", "")
+    paths = state.get("image_paths", [])
+    user_id = state.get("user_id", "anonymous")
+    
+    if not paths:
+        print("[node] create_meme — No images available to meme.")
+        return {}
+        
+    raw_comic_path = paths[-1] # use the last generated image
+    
+    # Extract quotes
+    top_text, bottom_text = extract_humorous_quote(story_draft)
+    
+    # Assemble meme
+    meme_path = assemble_meme(raw_comic_path, top_text, bottom_text, filename="meme_final.jpg")
+    if meme_path:
+        paths.append(meme_path)
+        
+    # --- Upload to Supabase Storage ---
+    print("[node] create_meme — Uploading to Supabase...")
+    bucket_name = "media"
+    comic_url = ""
+    meme_url = ""
+    
+    try:
+        # Upload Comic
+        if os.path.exists(raw_comic_path):
+            comic_dest = f"{user_id}/comic_{os.path.basename(raw_comic_path)}"
+            with open(raw_comic_path, "rb") as f:
+                supabase.storage.from_(bucket_name).upload(comic_dest, f, {"upsert": "true"})
+            comic_url = supabase.storage.from_(bucket_name).get_public_url(comic_dest)
+            
+        # Upload Meme
+        if os.path.exists(meme_path):
+            meme_dest = f"{user_id}/meme_{os.path.basename(meme_path)}"
+            with open(meme_path, "rb") as f:
+                supabase.storage.from_(bucket_name).upload(meme_dest, f, {"upsert": "true"})
+            meme_url = supabase.storage.from_(bucket_name).get_public_url(meme_dest)
+            
+        print("[node] create_meme — Upload complete. Updating database.")
+        
+        # Update Database
+        supabase.table("stories").update({
+            "comic_url": comic_url,
+            "meme_url": meme_url
+        }).eq("user_id", user_id).execute()
+        
+    except Exception as e:
+        print(f"[node] create_meme — Supabase upload/update failed: {e}")
+        
+    # Clean up local files
+    for p in [raw_comic_path, meme_path]:
+        if p and os.path.exists(p):
+            try:
+                os.remove(p)
+            except:
+                pass
+                
+    # We return the public URLs in image_paths so the client gets them
+    final_paths = []
+    if comic_url: final_paths.append(comic_url)
+    if meme_url: final_paths.append(meme_url)
+    
+    return {"image_paths": final_paths}
 
 
 # ---------------------------------------------------------------------------

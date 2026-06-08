@@ -49,7 +49,7 @@ scribe_llm = ChatOpenAI(
     api_key=OPENROUTER_API_KEY,
     base_url=_OPENROUTER_BASE,
     temperature=0.8,
-    max_tokens=4096,
+    max_tokens=2048,
 )
 
 
