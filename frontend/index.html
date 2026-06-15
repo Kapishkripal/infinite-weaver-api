@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Storyverse - Login</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500&amp;family=Manrope:wght@400;600;700&amp;family=Noto+Serif:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config (The Modern Citadel) -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error": "#fa746f",
+                        "on-secondary-container": "#ffa99c",
+                        "outline": "#6d7779",
+                        "tertiary-fixed-dim": "#acccf0",
+                        "error-container": "#871f21",
+                        "inverse-surface": "#f6fafb",
+                        "on-error": "#490006",
+                        "tertiary-fixed": "#badaff",
+                        "background": "#0a0f10",
+                        "on-secondary-fixed-variant": "#a43527",
+                        "on-error-container": "#ff9993",
+                        "on-primary-container": "#e3e3e3",
+                        "inverse-primary": "#5f5f5f",
+                        "on-secondary-fixed": "#7c180f",
+                        "on-tertiary": "#365675",
+                        "tertiary-container": "#badaff",
+                        "surface-variant": "#1e2729",
+                        "surface-tint": "#c6c6c6",
+                        "on-primary-fixed-variant": "#5b5b5b",
+                        "surface": "#0a0f10",
+                        "surface-container-highest": "#1e2729",
+                        "surface-container-lowest": "#000000",
+                        "surface-container-high": "#192122",
+                        "secondary-dim": "#fe7764",
+                        "surface-container-low": "#0e1416",
+                        "outline-variant": "#404a4b",
+                        "surface-container": "#131b1c",
+                        "on-tertiary-fixed-variant": "#375775",
+                        "error-dim": "#c54d4a",
+                        "on-tertiary-fixed": "#173a57",
+                        "secondary-fixed-dim": "#ffc7bf",
+                        "surface-dim": "#0a0f10",
+                        "secondary-container": "#77140b",
+                        "on-background": "#dde7e9",
+                        "primary-fixed-dim": "#d4d4d4",
+                        "on-surface": "#dde7e9",
+                        "surface-bright": "#242e2f",
+                        "primary-fixed": "#e2e2e2",
+                        "on-tertiary-container": "#2d4d6b",
+                        "primary": "#c6c6c6",
+                        "on-surface-variant": "#a2adaf",
+                        "secondary-fixed": "#ffdad4",
+                        "on-primary": "#404040",
+                        "on-secondary": "#7e190f",
+                        "tertiary-dim": "#acccf0",
+                        "tertiary": "#d4e7ff",
+                        "primary-dim": "#b9b9b9",
+                        "primary-container": "#525252",
+                        "inverse-on-surface": "#515657",
+                        "secondary": "#ffb4a8",
+                        "on-primary-fixed": "#3f3f3f"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Lexend", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .ambient-shadow {
+            box-shadow: 0 0 48px 0 rgba(221, 231, 233, 0.06); /* on-surface at 6% */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body min-h-screen relative flex items-center justify-center overflow-x-hidden">
+<!-- Background Texture/Motif -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none mix-blend-overlay" data-alt="close up of dark rough forged metal armor surface with deep shadows and subtle highlights" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD8rORi0sSvTvR43DStuUBz1u1xxSkCdgqCTpV59_fvPgNogLMziMq31HAfl3RiZQ8o74wT_AIrV5eMeCdMRQZalZFX6zmvi_1M7BFRu4y3JiLM1R4tNHpBmmc-RhdAgLDnCOFYQwtO2TAf_ZceBvE0uOtkL_c9QlNdl49ZtybrWDmHTYq5h8MkK2K3im7wmID6_7E4Rg3RR6ZUYkl2M0IaKL0UuZcMfVjQGyyERKDJnkyWrN-gVnSix3qKXCItN-DoVNoCYkJgOr0'); background-size: cover; background-position: center;">
+</div>
+
+<!-- Main Content Container (The Citadel Plateau) -->
+<main class="relative z-10 w-full max-w-md px-6 py-12">
+<!-- Header -->
+<div class="flex flex-col items-center mb-12">
+<span class="material-symbols-outlined text-4xl text-primary mb-4" style="font-variation-settings: 'FILL' 1;">shield</span>
+<h1 class="font-headline text-4xl md:text-5xl tracking-[-0.02em] text-primary mb-2">Storyverse</h1>
+<p class="font-body text-on-surface-variant text-sm">Enter the Citadel</p>
+</div>
+<!-- Form Card (Armor Plate) -->
+<div class="bg-surface-container-low p-8 rounded-DEFAULT ambient-shadow flex flex-col gap-8">
+<form class="flex flex-col gap-6" onsubmit="event.preventDefault(); window.location.href='home.html';">
+<!-- Email Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label text-sm text-on-surface-variant font-semibold ml-1" for="email">Email</label>
+<input class="h-14 bg-surface-container-lowest text-on-surface px-4 rounded-DEFAULT border-none focus:ring-1 focus:ring-primary/40 focus:outline-none placeholder:text-on-surface-variant/40 font-body transition-shadow" id="email" placeholder="knight@realm.com" type="email"/>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end ml-1">
+<label class="font-label text-sm text-on-surface-variant font-semibold" for="password">Password</label>
+<a class="font-label text-xs text-primary hover:text-primary-fixed transition-colors" href="#">Forgot?</a>
+</div>
+<input class="h-14 bg-surface-container-lowest text-on-surface px-4 rounded-DEFAULT border-none focus:ring-1 focus:ring-primary/40 focus:outline-none placeholder:text-on-surface-variant/40 font-body transition-shadow" id="password" placeholder="••••••••" type="password"/>
+</div>
+<!-- Primary CTA (The Gauntlet) -->
+<button class="mt-2 h-14 w-full bg-gradient-to-br from-primary to-on-primary-container text-on-primary font-label font-bold tracking-wide rounded-DEFAULT hover:brightness-110 transition-all flex items-center justify-center gap-2" type="submit">
+<span>Sign In</span>
+<span class="material-symbols-outlined text-sm">login</span>
+</button>
+</form>
+
+</div>
+</main>
+</body></html>

@@ -1,0 +1,126 @@
+// Use the global supabase object provided by the UMD CDN script
+const { createClient } = supabase;
+
+// Replace with your actual Supabase URL and ANON Key from the backend .env
+const supabaseUrl = 'https://qgdcjihqphldvfxdkbog.supabase.co';
+const supabaseKey = 'sb_publishable_mkRiOgVLOH1vb8RtI5Kv2g_bHQKOOqo';
+const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- HOME PAGE LOGIC (Generate Story) ---
+    const generateBtn = document.getElementById('generateBtn');
+    if (generateBtn) {
+        generateBtn.addEventListener('click', async () => {
+            const promptInput = document.getElementById('promptInput');
+            const loadingStatus = document.getElementById('loadingStatus');
+            const promptText = promptInput.value.trim();
+
+            if (!promptText) {
+                alert("Please describe a hero, setting, or conflict first!");
+                return;
+            }
+
+            // UI State
+            generateBtn.disabled = true;
+            generateBtn.style.opacity = '0.5';
+            loadingStatus.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to generate story");
+                }
+
+                const result = await response.json();
+                console.log("Generation complete:", result);
+                
+                // Redirect to stories feed to see the new creation
+                window.location.href = 'stories.html';
+                
+            } catch (error) {
+                console.error(error);
+                alert("The forge encountered an error. Please try again.");
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.style.opacity = '1';
+                loadingStatus.classList.add('hidden');
+            }
+        });
+    }
+
+    // --- STORIES PAGE LOGIC (Fetch Feed) ---
+    const storyFeed = document.getElementById('storyFeed');
+    if (storyFeed) {
+        loadStories();
+    }
+});
+
+async function loadStories() {
+    const feedContainer = document.getElementById('storyFeed');
+    const loadingMsg = document.getElementById('loadingFeedStatus');
+    const template = document.getElementById('storyCardTemplate');
+
+    try {
+        // Fetch stories from Supabase, ordered by newest first
+        const { data: stories, error } = await supabaseClient
+            .from('stories')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Hide loading
+        if (loadingMsg) loadingMsg.style.display = 'none';
+
+        if (!stories || stories.length === 0) {
+            feedContainer.innerHTML += `<p class="text-on-surface-variant text-center mt-8">The archives are empty. Forge a new story!</p>`;
+            return;
+        }
+
+        // Render each story
+        stories.forEach(story => {
+            const clone = template.content.cloneNode(true);
+            
+            // Populate Text
+            clone.querySelector('.story-title').textContent = story.prompt || "An Epic Tale";
+            clone.querySelector('.story-content').textContent = story.story_text || "No story content found.";
+            
+            // Format Date if available
+            const dateEl = clone.querySelector('.story-date');
+            if (dateEl && story.created_at) {
+                const date = new Date(story.created_at);
+                dateEl.textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+
+            // Populate Comic Image
+            const comicImg = clone.querySelector('.story-comic');
+            if (comicImg) {
+                comicImg.src = story.comic_url || 'https://placeholder.pics/svg/400?text=No+Comic';
+            }
+
+            // Populate Meme Image
+            const memeContainer = clone.querySelector('.meme-container');
+            const memeImg = clone.querySelector('.story-meme');
+            
+            if (story.meme_url) {
+                memeImg.src = story.meme_url;
+            } else {
+                if (memeContainer) memeContainer.style.display = 'none';
+            }
+
+            feedContainer.appendChild(clone);
+        });
+
+    } catch (error) {
+        console.error("Error fetching stories:", error);
+        loadingMsg.innerHTML = "Failed to load chronicles.";
+    }
+}
