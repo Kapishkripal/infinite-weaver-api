@@ -8,6 +8,7 @@ Run with:
 """
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.generate import router as generate_router
 
@@ -18,6 +19,17 @@ app = FastAPI(
         "generates comic panels, and creates memes — orchestrated by LangGraph."
     ),
     version="0.1.0",
+)
+
+# ---------------------------------------------------------------------------
+# Configure CORS
+# ---------------------------------------------------------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins (Vercel, localhost, etc.)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, OPTIONS)
+    allow_headers=["*"],
 )
 
 # ---------------------------------------------------------------------------

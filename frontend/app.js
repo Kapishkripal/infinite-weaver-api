@@ -27,6 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
             generateBtn.disabled = true;
             generateBtn.style.opacity = '0.5';
             loadingStatus.classList.remove('hidden');
+            
+            // Render Cold Start UX
+            const loadingText = loadingStatus.querySelector('span:nth-child(2)');
+            const originalText = loadingText.textContent;
+            
+            const coldStartTimeout = setTimeout(() => {
+                loadingText.textContent = "Waking up the Citadel (this may take up to 50s)...";
+                loadingText.classList.add("text-secondary", "animate-pulse");
+            }, 5000);
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/generate`, {
@@ -49,6 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(error);
                 alert("The forge encountered an error. Please try again.");
             } finally {
+                clearTimeout(coldStartTimeout);
+                loadingText.textContent = originalText;
+                loadingText.classList.remove("text-secondary", "animate-pulse");
                 generateBtn.disabled = false;
                 generateBtn.style.opacity = '1';
                 loadingStatus.classList.add('hidden');
