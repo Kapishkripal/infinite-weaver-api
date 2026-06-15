@@ -51,6 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
                 console.log("Generation complete:", result);
                 
+                if (!result.story_draft && result.follow_up_question) {
+                    alert("The Citadel asks: " + result.follow_up_question);
+                    return; // Do not redirect
+                } else if (!result.story_draft) {
+                    throw new Error("No story was generated.");
+                }
+                
                 // Redirect to stories feed to see the new creation
                 window.location.href = 'stories.html';
                 

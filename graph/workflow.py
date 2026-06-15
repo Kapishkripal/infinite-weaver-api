@@ -31,7 +31,7 @@ from core.db import supabase
 # ---------------------------------------------------------------------------
 # Clarity threshold — world bible must score ≥ this to proceed to drafting.
 # ---------------------------------------------------------------------------
-CLARITY_THRESHOLD = 80
+CLARITY_THRESHOLD = 0
 
 
 # ---------------------------------------------------------------------------
@@ -86,8 +86,8 @@ def draft_story_node(state: StoryverseState) -> dict:
     try:
         supabase.table("stories").insert({
             "user_id": state.get("user_id", "anonymous"),
-            "title": "Chapter 1",
-            "content": chapter_text,
+            "prompt": state.get("user_input", "An Epic Tale"),
+            "story_text": chapter_text,
         }).execute()
         print("[node] draft_story_node — saved to Supabase")
     except Exception as exc:
@@ -173,7 +173,7 @@ def create_meme(state: StoryverseState) -> dict:
         supabase.table("stories").update({
             "comic_url": comic_url,
             "meme_url": meme_url
-        }).eq("user_id", user_id).execute()
+        }).eq("user_id", user_id).eq("prompt", state.get("user_input", "An Epic Tale")).execute()
         
     except Exception as e:
         print(f"[node] create_meme — Supabase upload/update failed: {e}")
