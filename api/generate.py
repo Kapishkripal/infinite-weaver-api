@@ -8,7 +8,7 @@ Storyverse workflow.
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
 from graph.state import StoryverseState
@@ -98,4 +98,45 @@ async def generate(request: GenerateRequest):
     config = {"configurable": {"thread_id": request.user_id}}
     result = storyverse_graph.invoke(initial_state, config=config)
 
+    return GenerateResponse(**result)
+
+
+@router.post("/chat/{session_id}/stream")
+async def generate_chat_stream(session_id: str, request: Request):
+    """Compatibility alias for Vercel chat stream templates."""
+    
+    # Try to parse whatever JSON the frontend sent
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+        
+    # Extract prompt from various possible template formats
+    prompt = payload.get("prompt", "")
+    if not prompt and "messages" in payload:
+        messages = payload["messages"]
+        if isinstance(messages, list) and len(messages) > 0:
+            prompt = messages[-1].get("content", "")
+            
+    if not prompt:
+        prompt = "A generic story prompt"
+
+    # Build the initial state
+    initial_state: StoryverseState = {
+        "user_id": session_id,
+        "user_input": prompt,
+        "clarity_score": 0,
+        "world_bible": {"prompt": prompt},
+        "missing_elements": [],
+        "interview_history": [],
+        "follow_up_question": "",
+        "story_draft": "",
+        "image_paths": [],
+    }
+
+    # Execute the workflow
+    config = {"configurable": {"thread_id": session_id}}
+    result = storyverse_graph.invoke(initial_state, config=config)
+
+    # Return exactly what the main endpoint returns
     return GenerateResponse(**result)
