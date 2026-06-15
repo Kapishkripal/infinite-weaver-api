@@ -6,7 +6,7 @@ const supabaseUrl = 'https://qgdcjihqphldvfxdkbog.supabase.co';
 const supabaseKey = 'sb_publishable_mkRiOgVLOH1vb8RtI5Kv2g_bHQKOOqo';
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://infinite-weaver-api-1.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
     
