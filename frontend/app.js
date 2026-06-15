@@ -10,6 +10,10 @@ const API_BASE_URL = 'https://infinite-weaver-api-1.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
     
+    // --- AKINATOR STATE ---
+    let currentWorldBible = {};
+    let currentInterviewHistory = [];
+    
     // --- HOME PAGE LOGIC (Generate Story) ---
     const generateBtn = document.getElementById('generateBtn');
     if (generateBtn) {
@@ -41,7 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`${API_BASE_URL}/api/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: promptText })
+                    body: JSON.stringify({ 
+                        prompt: promptText,
+                        world_bible: currentWorldBible,
+                        interview_history: currentInterviewHistory
+                    })
                 });
 
                 if (!response.ok) {
@@ -51,9 +59,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
                 console.log("Generation complete:", result);
                 
+                // Update Local State
+                if (result.world_bible) currentWorldBible = result.world_bible;
+                if (result.interview_history) currentInterviewHistory = result.interview_history;
+                
                 if (!result.story_draft && result.follow_up_question) {
-                    alert("The Citadel asks: " + result.follow_up_question);
-                    return; // Do not redirect
+                    // Inject Chat UI
+                    appendChatMessage('user', promptText);
+                    appendChatMessage('ai', result.follow_up_question);
+                    
+                    // Update UI for next turn
+                    promptInput.value = '';
+                    promptInput.placeholder = 'Answer the Citadel...';
+                    document.getElementById('forgeTitle').textContent = 'The Citadel Asks...';
+                    document.getElementById('btnText').textContent = 'Reply';
+                    
+                    return; // Do not redirect yet
                 } else if (!result.story_draft) {
                     throw new Error("No story was generated.");
                 }
@@ -81,6 +102,30 @@ document.addEventListener('DOMContentLoaded', () => {
         loadStories();
     }
 });
+
+function appendChatMessage(role, text) {
+    const chatHistory = document.getElementById('chatHistory');
+    if (!chatHistory) return;
+    
+    chatHistory.classList.remove('hidden');
+    
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `p-3 rounded-lg text-sm w-[90%] ${role === 'user' ? 'bg-primary/20 border border-primary/30 text-on-surface self-end ml-auto' : 'bg-surface-variant border border-outline text-on-surface self-start'}`;
+    
+    const label = document.createElement('div');
+    label.className = `text-xs font-bold mb-1 tracking-wider uppercase ${role === 'user' ? 'text-primary' : 'text-secondary'}`;
+    label.textContent = role === 'user' ? 'You' : 'The Citadel';
+    
+    const content = document.createElement('div');
+    content.textContent = text;
+    
+    msgDiv.appendChild(label);
+    msgDiv.appendChild(content);
+    chatHistory.appendChild(msgDiv);
+    
+    // Auto-scroll
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
 
 async function loadStories() {
     const feedContainer = document.getElementById('storyFeed');

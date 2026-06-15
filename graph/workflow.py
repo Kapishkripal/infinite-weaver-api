@@ -31,7 +31,7 @@ from core.db import supabase
 # ---------------------------------------------------------------------------
 # Clarity threshold — world bible must score ≥ this to proceed to drafting.
 # ---------------------------------------------------------------------------
-CLARITY_THRESHOLD = 0
+CLARITY_THRESHOLD = 70
 
 
 # ---------------------------------------------------------------------------
