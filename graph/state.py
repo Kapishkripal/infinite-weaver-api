@@ -22,6 +22,9 @@ class StoryverseState(TypedDict):
     # 0-100 integer reflecting how complete the world bible is.
     # 80+ means the world is ready for story drafting.
     clarity_score: int
+    
+    # The target clarity score required to proceed to drafting.
+    target_score: int
 
     # Structured world-building context extracted from the interview
     # (setting, characters, tone, themes, etc.).

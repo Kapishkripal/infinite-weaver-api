@@ -29,12 +29,6 @@ from core.db import supabase
 
 
 # ---------------------------------------------------------------------------
-# Clarity threshold — world bible must score ≥ this to proceed to drafting.
-# ---------------------------------------------------------------------------
-CLARITY_THRESHOLD = 70
-
-
-# ---------------------------------------------------------------------------
 # Real nodes
 # ---------------------------------------------------------------------------
 
@@ -205,11 +199,13 @@ def route_after_evaluation(state: StoryverseState) -> str:
     Returns a routing key that maps to a registered node name
     in the conditional edge dictionary.
     """
-    score = state.get("clarity_score", 0)
-    if score >= CLARITY_THRESHOLD:
-        print(f"[router] clarity_score={score} >= {CLARITY_THRESHOLD} -> drafting")
+    current_score = state.get("clarity_score", 0)
+    target = state.get("target_score", 80) # Fallback to 80 if missing
+
+    print(f"[router] Current clarity: {current_score}%, Target threshold: {target}%")
+
+    if current_score >= target:
         return "draft_story_node"
-    print(f"[router] clarity_score={score} < {CLARITY_THRESHOLD} -> more questions")
     return "inquisitor_node"
 
 
