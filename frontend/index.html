@@ -218,6 +218,71 @@
             </nav>
         </div>
     <script src="app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let accumulatedWorldBible = {};
+    let rollingInterviewHistory = [];
+
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const promptInput = document.querySelector('input[type="text"], textarea');
+            if (!promptInput || !promptInput.value.trim()) return;
+            
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Weaving your world...";
+            }
+
+            try {
+                const response = await fetch('https://infinite-weaver-api.onrender.com/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: 'anonymous_tester',
+                        prompt: promptInput.value,
+                        world_bible: accumulatedWorldBible,
+                        interview_history: rollingInterviewHistory
+                    })
+                });
+                
+                const data = await response.json();
+                
+                accumulatedWorldBible = data.world_bible || accumulatedWorldBible;
+                
+                if (data.follow_up_question) {
+                    rollingInterviewHistory.push({
+                        question: data.follow_up_question,
+                        answer: promptInput.value
+                    });
+                    
+                    const questionBox = document.querySelector('.the-citadel-box');
+                    if (questionBox) questionBox.innerText = data.follow_up_question;
+                    promptInput.value = ""; 
+                    
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Reply to Citadel";
+                    }
+                }
+
+                if (data.story_draft && data.story_draft.trim() !== "") {
+                    window.location.href = "/stories";
+                }
+                
+            } catch (err) {
+                console.error('Cloud network link failed:', err);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Generate";
+                }
+            }
+        });
+    }
+});
+</script>
 </body>
 
 </html>
