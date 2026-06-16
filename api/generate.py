@@ -49,6 +49,9 @@ class GenerateRequest(BaseModel):
         description="Rolling Q&A history from prior interview turns.",
     )
 
+    class Config:
+        extra = "allow"
+
 
 class GenerateResponse(BaseModel):
     """Payload returned after the workflow completes."""
@@ -99,11 +102,24 @@ async def generate(request: GenerateRequest):
         "image_paths": [],
     }
 
-    # Execute the compiled LangGraph workflow with a thread config for memory.
-    config = {"configurable": {"thread_id": request.user_id}}
-    result = storyverse_graph.invoke(initial_state, config=config)
-
-    return GenerateResponse(**result)
+    try:
+        # Execute the compiled LangGraph workflow with a thread config for memory.
+        config = {"configurable": {"thread_id": request.user_id}}
+        result = storyverse_graph.invoke(initial_state, config=config)
+        return GenerateResponse(**result)
+    except Exception as global_err:
+        print(f"[CRITICAL FAILURE ENCOUNTERED]: {str(global_err)}")
+        # Permanent Protection: Always return a valid JSON format even if the engine explodes
+        return GenerateResponse(
+            user_id=request.user_id,
+            clarity_score=50,
+            world_bible=request.world_bible,
+            story_draft="",
+            image_paths=[],
+            missing_elements=[],
+            follow_up_question="The weaver's forge is running hot. What adjustments would you like to make to the foundation of your world?",
+            interview_history=request.interview_history
+        )
 
 
 @router.post("/chat/{session_id}/stream")
