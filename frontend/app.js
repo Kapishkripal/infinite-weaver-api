@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const loadingStatus = document.getElementById('loadingStatus');
             const promptText = promptInput.value.trim();
 
-            if (!promptText) {
+            if (!promptText && currentInterviewHistory.length === 0) {
                 alert("Please describe a hero, setting, or conflict first!");
                 return;
             }
