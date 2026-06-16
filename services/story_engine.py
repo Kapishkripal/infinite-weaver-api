@@ -16,7 +16,7 @@ from typing import Any
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from core.config import OPENROUTER_API_KEY
 
@@ -135,10 +135,18 @@ def evaluate_world_bible(
 
     structured_llm = architect_llm.with_structured_output(WorldBibleEvaluation)
 
-    raw_result = structured_llm.invoke([
-        SystemMessage(content=_ARCHITECT_SYSTEM),
-        HumanMessage(content=human_prompt),
-    ])
+    try:
+        raw_result = structured_llm.invoke([
+            SystemMessage(content=_ARCHITECT_SYSTEM),
+            HumanMessage(content=human_prompt),
+        ])
+    except (ValidationError, Exception) as pydantic_err:
+        print(f"[Warning] Incomplete JSON chunk from OpenRouter provider: {pydantic_err}")
+        return {
+            "clarity_score": 0,
+            "world_bible": world_bible if world_bible else {},
+            "missing_elements": ["Could not extract elements. Please clarify your prompt."],
+        }
 
     # Defensive: with_structured_output may return a raw dict depending
     # on the provider.
