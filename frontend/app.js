@@ -14,6 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentWorldBible = {};
     let currentInterviewHistory = [];
     
+    // --- CLARITY UI CONTROLS ---
+    const depthSlider = document.getElementById('depth-slider');
+    const sliderVal = document.getElementById('slider-val');
+    if (depthSlider && sliderVal) {
+        depthSlider.addEventListener('input', (e) => {
+            sliderVal.textContent = e.target.value;
+        });
+    }
+    
     // --- HOME PAGE LOGIC (Generate Story) ---
     const generateBtn = document.getElementById('generateBtn');
     if (generateBtn) {
@@ -42,11 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 5000);
 
             try {
+                // Determine the target score
+                const targetScore = depthSlider ? parseInt(depthSlider.value) : 80;
+
                 const response = await fetch(`${API_BASE_URL}/api/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         prompt: promptText,
+                        target_score: targetScore,
                         world_bible: currentWorldBible,
                         interview_history: currentInterviewHistory
                     })
@@ -58,6 +71,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const result = await response.json();
                 console.log("Generation complete:", result);
+                
+                // Update Clarity Progress UI
+                const matchVal = document.getElementById('match-val');
+                const progressFill = document.getElementById('progress-fill');
+                if (matchVal && result.clarity_score !== undefined) {
+                    matchVal.textContent = result.clarity_score;
+                }
+                if (progressFill && result.clarity_score !== undefined) {
+                    progressFill.style.width = result.clarity_score + '%';
+                }
                 
                 // Update Local State
                 if (result.world_bible) currentWorldBible = result.world_bible;

@@ -151,6 +151,27 @@
                         class="hidden flex flex-col gap-3 mb-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                         <!-- Chat messages injected here -->
                     </div>
+                    <!-- Clarity UI Controls -->
+                    <div class="flex flex-col gap-3">
+                        <div class="slider-container flex flex-col gap-1">
+                            <label for="depth-slider" class="text-xs font-bold text-secondary uppercase tracking-widest flex justify-between">
+                                Required Story Depth
+                                <span><span id="slider-val" class="text-primary text-sm">80</span>%</span>
+                            </label>
+                            <input type="range" id="depth-slider" min="30" max="100" value="80" class="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary border border-outline/50">
+                        </div>
+                        
+                        <div class="match-container flex flex-col gap-1">
+                            <label class="text-xs font-bold text-secondary uppercase tracking-widest flex justify-between">
+                                AI Intent Match
+                                <span><span id="match-val" class="text-primary text-sm">0</span>%</span>
+                            </label>
+                            <div class="w-full bg-surface-container-highest rounded-full h-2.5 border border-outline/50 overflow-hidden">
+                                <div id="progress-fill" class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: 0%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <label for="promptInput" class="sr-only">Describe the hero, setting, and conflict</label>
                     <textarea id="promptInput"
                         class="w-full bg-surface-container-highest text-on-surface border border-outline-variant rounded-lg p-4 font-body placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow resize-y"
@@ -196,62 +217,7 @@
                 </a>
             </nav>
         </div>
-    </div>
-
     <script src="app.js"></script>
-    <script>
-        // 1. Wait for the page layout to fully load
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.querySelector('form');
-
-            if (form) {
-                form.addEventListener('submit', async function (e) {
-                    // 2. STOP the browser from jumping to stories.html
-                    e.preventDefault();
-                    console.log('Storyverse API Interceptor Active!');
-
-                    // 3. Extract the text value the user typed
-                    const promptInput = document.querySelector('input[type="text"], textarea');
-                    if (!promptInput || !promptInput.value.trim()) return;
-
-                    // 4. Force a visual loading state on the button
-                    const submitBtn = document.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        submitBtn.disabled = true;
-                        submitBtn.innerText = "Weaving your world...";
-                    }
-
-                    try {
-                        // 5. Fire the live payload straight to your Render cloud engine
-                        const response = await fetch('https://infinite-weaver-api.onrender.com/api/generate', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                user_id: 'anonymous_tester',
-                                prompt: promptInput.value,
-                                world_bible: {},
-                                interview_history: []
-                            })
-                        });
-
-                        const data = await response.json();
-                        console.log('Render engine response:', data);
-
-                        // 6. Redirect to archives ONLY after the cloud successfully creates the story row
-                        window.location.href = "/stories";
-
-                    } catch (err) {
-                        console.error('Cloud network link failed:', err);
-                        alert('The cloud connection timed out. Check your Render logs.');
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerText = "Generate";
-                        }
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 
 </html>
