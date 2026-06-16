@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/home.html"
+    },
+    {
       "source": "/api/chat/:session_id/stream",
       "destination": "https://infinite-weaver-api-1.onrender.com/api/chat/:session_id/stream"
     },
