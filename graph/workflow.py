@@ -201,8 +201,13 @@ def route_after_evaluation(state: StoryverseState) -> str:
     """
     current_score = state.get("clarity_score", 0)
     target = state.get("target_score", 80) # Fallback to 80 if missing
+    force = state.get("force_generate", False)
 
     print(f"[router] Current clarity: {current_score}%, Target threshold: {target}%")
+
+    if force:
+        print("[router] force_generate=True -> drafting immediately")
+        return "draft_story_node"
 
     if current_score >= target:
         return "draft_story_node"

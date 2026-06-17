@@ -38,6 +38,10 @@ class GenerateRequest(BaseModel):
         default=80,
         description="The user-selected clarity score required to trigger drafting.",
     )
+    force_generate: bool = Field(
+        default=False,
+        description="Bypass the Akinator loop and force generation immediately."
+    )
     # Allow the client to pass back accumulated state for multi-turn
     # interview sessions.
     world_bible: dict = Field(
@@ -94,6 +98,7 @@ async def generate(request: GenerateRequest):
         "user_input": request.prompt,
         "clarity_score": 0,
         "target_score": request.target_score,
+        "force_generate": request.force_generate,
         "world_bible": request.world_bible or {"prompt": request.prompt},
         "missing_elements": [],
         "interview_history": request.interview_history,
@@ -147,6 +152,8 @@ async def generate_chat_stream(session_id: str, request: Request):
         "user_id": session_id,
         "user_input": prompt,
         "clarity_score": 0,
+        "target_score": 80,
+        "force_generate": False,
         "world_bible": {"prompt": prompt},
         "missing_elements": [],
         "interview_history": [],

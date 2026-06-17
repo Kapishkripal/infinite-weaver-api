@@ -26,6 +26,9 @@ class StoryverseState(TypedDict):
     # The target clarity score required to proceed to drafting.
     target_score: int
 
+    # Flag to bypass the Akinator loop and force drafting immediately.
+    force_generate: bool
+
     # Structured world-building context extracted from the interview
     # (setting, characters, tone, themes, etc.).
     world_bible: dict

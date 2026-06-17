@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- AKINATOR STATE ---
     let currentWorldBible = {};
     let currentInterviewHistory = [];
+    let forceDraft = false;
     
     // --- CLARITY UI CONTROLS ---
     const depthSlider = document.getElementById('depth-slider');
@@ -20,6 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (depthSlider && sliderVal) {
         depthSlider.addEventListener('input', (e) => {
             sliderVal.textContent = e.target.value;
+        });
+    }
+
+    const forceGenerateBtn = document.getElementById('forceGenerateBtn');
+    if (forceGenerateBtn) {
+        forceGenerateBtn.addEventListener('click', () => {
+            forceDraft = true;
+            const generateBtn = document.getElementById('generateBtn');
+            if (generateBtn) generateBtn.click();
         });
     }
     
@@ -61,7 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         prompt: promptText,
                         target_score: targetScore,
                         world_bible: currentWorldBible,
-                        interview_history: currentInterviewHistory
+                        interview_history: currentInterviewHistory,
+                        force_generate: forceDraft
                     })
                 });
 
@@ -115,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 generateBtn.disabled = false;
                 generateBtn.style.opacity = '1';
                 loadingStatus.classList.add('hidden');
+                forceDraft = false;
             }
         });
     }
