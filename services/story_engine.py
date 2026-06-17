@@ -14,42 +14,38 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from pydantic import BaseModel, Field, ValidationError
 
-from core.config import OPENROUTER_API_KEY
-
 # ---------------------------------------------------------------------------
-# OpenRouter-backed LLM clients
+# Google Gemini LLM clients
 # ---------------------------------------------------------------------------
-
-_OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 
 # Architect & Inquisitor — fast, cheap, great at structured output
-architect_llm = ChatOpenAI(
-    model="google/gemini-2.5-flash",
-    api_key=OPENROUTER_API_KEY,
-    base_url=_OPENROUTER_BASE,
+architect_llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
     temperature=0.4,
     max_tokens=2048,
+    timeout=None,
+    max_retries=2
 )
 
-inquisitor_llm = ChatOpenAI(
-    model="google/gemini-2.5-flash",
-    api_key=OPENROUTER_API_KEY,
-    base_url=_OPENROUTER_BASE,
+inquisitor_llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
     temperature=0.7,
     max_tokens=2048,
+    timeout=None,
+    max_retries=2
 )
 
 # Scribe — higher-quality model for long-form prose
-scribe_llm = ChatOpenAI(
-    model="google/gemini-2.5-pro",
-    api_key=OPENROUTER_API_KEY,
-    base_url=_OPENROUTER_BASE,
-    temperature=0.8,
+scribe_llm = ChatGoogleGenerativeAI(
+    model="gemini-3.5-flash",  # You can change this to gemini-3.1-pro later if needed
+    temperature=0.7,
     max_tokens=2048,
+    timeout=None,
+    max_retries=2
 )
 
 
@@ -141,7 +137,7 @@ def evaluate_world_bible(
             HumanMessage(content=human_prompt),
         ])
     except (ValidationError, Exception) as pydantic_err:
-        print(f"[Warning] Incomplete JSON chunk from OpenRouter provider: {pydantic_err}")
+        print(f"[Warning] Incomplete JSON chunk from Google GenAI provider: {pydantic_err}")
         return {
             "clarity_score": 0,
             "world_bible": world_bible if world_bible else {},
