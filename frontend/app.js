@@ -9,12 +9,12 @@ const supabaseClient = createClient(supabaseUrl, supabaseKey);
 const API_BASE_URL = 'https://infinite-weaver-api-1.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // --- AKINATOR STATE ---
     let currentWorldBible = {};
     let currentInterviewHistory = [];
     let forceDraft = false;
-    
+
     // --- CLARITY UI CONTROLS ---
     const depthSlider = document.getElementById('depth-slider');
     const sliderVal = document.getElementById('slider-val');
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (generateBtn) generateBtn.click();
         });
     }
-    
+
     // --- HOME PAGE LOGIC (Generate Story) ---
     const generateBtn = document.getElementById('generateBtn');
     if (generateBtn) {
@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const loadingStatus = document.getElementById('loadingStatus');
             const promptText = promptInput.value.trim();
 
-            if (!promptText && currentInterviewHistory.length === 0) {
+            // Alert ONLY if prompt is empty, it's the first turn, AND they didn't click Force Generate
+            if (!promptText && currentInterviewHistory.length === 0 && !forceDraft) {
                 alert("Please describe a hero, setting, or conflict first!");
                 return;
             }
@@ -50,11 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
             generateBtn.disabled = true;
             generateBtn.style.opacity = '0.5';
             loadingStatus.classList.remove('hidden');
-            
+
             // Render Cold Start UX
             const loadingText = loadingStatus.querySelector('span:nth-child(2)');
             const originalText = loadingText.textContent;
-            
+
             const coldStartTimeout = setTimeout(() => {
                 loadingText.textContent = "Waking up the Citadel (this may take up to 50s)...";
                 loadingText.classList.add("text-secondary", "animate-pulse");
@@ -67,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`${API_BASE_URL}/api/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         prompt: promptText,
                         target_score: targetScore,
                         world_bible: currentWorldBible,
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const result = await response.json();
                 console.log("Generation complete:", result);
-                
+
                 // Update Clarity Progress UI
                 const matchVal = document.getElementById('match-val');
                 const progressFill = document.getElementById('progress-fill');
@@ -92,30 +93,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (progressFill && result.clarity_score !== undefined) {
                     progressFill.style.width = result.clarity_score + '%';
                 }
-                
+
                 // Update Local State
                 if (result.world_bible) currentWorldBible = result.world_bible;
                 if (result.interview_history) currentInterviewHistory = result.interview_history;
-                
+
                 if (!result.story_draft && result.follow_up_question) {
                     // Inject Chat UI
                     appendChatMessage('user', promptText);
                     appendChatMessage('ai', result.follow_up_question);
-                    
+
                     // Update UI for next turn
                     promptInput.value = '';
                     promptInput.placeholder = 'Answer the Citadel...';
                     document.getElementById('forgeTitle').textContent = 'The Citadel Asks...';
                     document.getElementById('btnText').textContent = 'Reply';
-                    
+
                     return; // Do not redirect yet
                 } else if (!result.story_draft) {
                     throw new Error("No story was generated.");
                 }
-                
+
                 // Redirect to stories feed to see the new creation
                 window.location.href = 'stories.html';
-                
+
             } catch (error) {
                 console.error(error);
                 alert("The forge encountered an error. Please try again.");
@@ -141,23 +142,23 @@ document.addEventListener('DOMContentLoaded', () => {
 function appendChatMessage(role, text) {
     const chatHistory = document.getElementById('chatHistory');
     if (!chatHistory) return;
-    
+
     chatHistory.classList.remove('hidden');
-    
+
     const msgDiv = document.createElement('div');
     msgDiv.className = `p-3 rounded-lg text-sm w-[90%] ${role === 'user' ? 'bg-primary/20 border border-primary/30 text-on-surface self-end ml-auto' : 'bg-surface-variant border border-outline text-on-surface self-start'}`;
-    
+
     const label = document.createElement('div');
     label.className = `text-xs font-bold mb-1 tracking-wider uppercase ${role === 'user' ? 'text-primary' : 'text-secondary'}`;
     label.textContent = role === 'user' ? 'You' : 'The Citadel';
-    
+
     const content = document.createElement('div');
     content.textContent = text;
-    
+
     msgDiv.appendChild(label);
     msgDiv.appendChild(content);
     chatHistory.appendChild(msgDiv);
-    
+
     // Auto-scroll
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
@@ -187,16 +188,16 @@ async function loadStories() {
         // Render each story
         stories.forEach(story => {
             const clone = template.content.cloneNode(true);
-            
+
             // Populate Text
             clone.querySelector('.story-title').textContent = story.prompt || "An Epic Tale";
             clone.querySelector('.story-content').textContent = story.story_text || "No story content found.";
-            
+
             // Format Date if available
             const dateEl = clone.querySelector('.story-date');
             if (dateEl && story.created_at) {
                 const date = new Date(story.created_at);
-                dateEl.textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                dateEl.textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
             // Populate Comic Image
@@ -208,7 +209,7 @@ async function loadStories() {
             // Populate Meme Image
             const memeContainer = clone.querySelector('.meme-container');
             const memeImg = clone.querySelector('.story-meme');
-            
+
             if (story.meme_url) {
                 memeImg.src = story.meme_url;
             } else {
