@@ -16,14 +16,14 @@ load_dotenv()
 
 SUPABASE_URL: str = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY: str = os.environ.get("SUPABASE_KEY", "")
-OPENROUTER_API_KEY: str = os.environ.get("OPENROUTER_API_KEY", "")
+GOOGLE_API_KEY: str = os.environ.get("GOOGLE_API_KEY", "")
 
 _missing = [
     name
     for name, val in [
         ("SUPABASE_URL", SUPABASE_URL),
         ("SUPABASE_KEY", SUPABASE_KEY),
-        ("OPENROUTER_API_KEY", OPENROUTER_API_KEY),
+        ("GOOGLE_API_KEY", GOOGLE_API_KEY),
     ]
     if not val
 ]
